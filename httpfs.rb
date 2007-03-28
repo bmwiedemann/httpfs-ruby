@@ -1,11 +1,14 @@
 # httpfs
-# - jerome etienne jerome.etienne@gmail.com
-# - it allows to read files with http uri, additionnaly it supports the size
-# - example of usage
+# - author: jerome etienne jerome.etienne@gmail.com
+# - license: MIT license
+# - description: it allows to read files with http uri, additionnaly it supports the size
+# - example of usage:
 #   # mount the mount point via httpfs.rb
 #   ruby httpfs.rb my/mount/point/directory
 #   # read http file at from http://www.example.com/index.html with
-#   wget my/mount/point/directory/www.example.com/index.html
+#   cat my/mount/point/directory/www.example.com/index.html
+# - this has been written very fast so use it at your own risk
+#   but it passed the 'work-on-my-box' validation test :)
 
 require 'fusefs'
 include FuseFS
