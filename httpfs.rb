@@ -26,6 +26,14 @@ require 'open-uri'
 ################################################################################
 ################################################################################
 class HttpFS < FuseFS::FuseDir
+  def set_uriprefix(prefix)
+    @uriprefix = prefix
+  end
+
+  def path2uri(path)
+    return "#{@uriprefix}#{path}"
+  end
+
   ##############################################################################
   # return true if path is a directory
   # TODO i have noidea what this code is doing - it is from OpenUriFS
@@ -57,7 +65,7 @@ class HttpFS < FuseFS::FuseDir
     #puts "enter size?{#{path})"
     #puts "size of uri http:/#{path}"
     # get the length of the http file by using the usual HEAD content_length
-    uri = URI.parse("http:/#{path}")
+    uri = URI.parse(path2uri(path))
     req = Net::HTTP::Head.new(uri.path)
     res = Net::HTTP.start(uri.host, uri.port) {|http| http.request(req) }
     #puts "length=#{res.content_length}"
@@ -86,7 +94,7 @@ class HttpFS < FuseFS::FuseDir
   ##############################################################################
   def raw_read(path, off, sz)
     #puts "enter raw_read?{#{path}, #{off}, #{sz})"
-    uri = URI.parse("http:/#{path}")
+    uri = URI.parse(path2uri(path))
     req = Net::HTTP::Get.new(uri.path)
     req.range=(off..off+sz-1)
     res = Net::HTTP.start(uri.host, uri.port) {|http| http.request(req) }
@@ -108,13 +116,20 @@ end
 
 exit unless (File.basename($0) == File.basename(__FILE__))
 
-if (ARGV.size != 1)
+if (ARGV.size < 1 or ARGV.size > 2)
   puts "Usage: #{$0} <directory>"
   exit
 end
 
 # get the dirname from the command line
-dirname = ARGV.shift
+if ARGV.size==1
+  dirname = ARGV.shift
+  uriprefix = "http:/"
+else
+  uriprefix = ARGV.shift
+  dirname = ARGV.shift
+end
+
 
 if not File.directory?(dirname)
   puts "Usage: #{dirname} is not a directory."
@@ -123,6 +138,7 @@ end
 
 # Start the FuseFS on HttpFS
 root = HttpFS.new
+root.set_uriprefix(uriprefix)
 FuseFS.set_root(root)
 FuseFS.mount_under(dirname)
 FuseFS.run # This doesn't return until we're unmounted.
