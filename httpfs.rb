@@ -1,3 +1,4 @@
+#!/usr/bin/ruby
 # httpfs
 # - author: jerome etienne jerome.etienne@gmail.com
 # - license: MIT license
